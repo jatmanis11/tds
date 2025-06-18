@@ -126,65 +126,6 @@ def virtual_ta_api(request):
             'links': [{'url': 'https://discourse.onlinedegree.iitm.ac.in/', 'text': 'TDS Course Forum'}]
         }, status=500)
 
-@csrf_exempt
-@require_http_methods(["GET"])
-def health_check(request):
-    """Health check endpoint for monitoring"""
-    try:
-        # Quick service checks
-        ai_service = MultiAIService()
-        data_scraper = DataScraper()
-        
-        health_data = {
-            'status': 'healthy',
-            'timestamp': timezone.now().isoformat(),
-            'ai_service': {
-                'initialized': ai_service.gemini_service.is_initialized,
-                'request_count': getattr(ai_service, 'request_count', 0),
-                'daily_limit': getattr(ai_service, 'daily_limit', 50)
-            },
-            'data_scraper': {
-                'course_sections': len(data_scraper.course_content),
-                'discourse_posts': len(data_scraper.discourse_posts)
-            },
-            'cache_status': 'available' if cache else 'unavailable'
-        }
-        
-        return JsonResponse(health_data)
-        
-    except Exception as e:
-        logger.error(f"Health check error: {e}")
-        return JsonResponse({
-            'status': 'unhealthy',
-            'error': str(e),
-            'timestamp': timezone.now().isoformat()
-        }, status=500)
-
-@csrf_exempt
-@require_http_methods(["GET"])
-def api_info(request):
-    """API information endpoint"""
-    return JsonResponse({
-        'name': 'TDS Virtual TA',
-        'version': '1.0.0',
-        'description': 'Virtual Teaching Assistant for IIT Madras Tools in Data Science course',
-        'endpoints': {
-            'main': '/api/',
-            'health': '/api/health/',
-            'info': '/api/info/'
-        },
-        'usage': {
-            'method': 'POST',
-            'content_type': 'application/json',
-            'required_fields': ['question'],
-            'optional_fields': ['image']
-        },
-        'rate_limits': {
-            'requests_per_minute': 10,
-            'requests_per_hour': 100
-        }
-    })
-
 # Helper functions
 
 def get_client_ip(request):
